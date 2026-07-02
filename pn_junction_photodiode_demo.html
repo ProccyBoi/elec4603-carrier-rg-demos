@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>P-N Junction Generation/Recombination Demo</title>
+  <style>
+    :root {
+      --bg: #f5f7f9;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #5e6b78;
+      --line: #d8e0e8;
+      --blue: #1f6aa5;
+      --green: #2d8064;
+      --red: #b23b3b;
+      --amber: #9b6500;
+      --shadow: 0 8px 24px rgba(23, 32, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(310px, 390px) 1fr;
+      min-height: 100vh;
+    }
+
+    aside {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 18px;
+      overflow: auto;
+    }
+
+    main {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 21px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .field {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .field:last-child {
+      border-bottom: 0;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    output {
+      color: var(--blue);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 8px 0 0;
+      accent-color: var(--blue);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f9fbfd;
+      color: var(--ink);
+      min-height: 36px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    button:focus-visible {
+      border-color: var(--blue);
+      outline: none;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(145px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border-left: 4px solid var(--blue);
+      background: #fbfcfe;
+      border-radius: 6px;
+      padding: 10px 12px;
+      min-height: 76px;
+    }
+
+    .metric:nth-child(2) {
+      border-left-color: var(--green);
+    }
+
+    .metric:nth-child(3) {
+      border-left-color: var(--amber);
+    }
+
+    .metric:nth-child(4) {
+      border-left-color: var(--red);
+    }
+
+    .metric b {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .metric span {
+      display: block;
+      font-size: 17px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .metric small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      margin-top: 4px;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 360px;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    .equations {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(170px, 1fr));
+      gap: 10px;
+    }
+
+    .eq {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfe;
+      min-height: 78px;
+    }
+
+    .eq code {
+      display: block;
+      color: var(--ink);
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      margin-bottom: 6px;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .status div {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fbfcfe;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .status b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 1040px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .metrics,
+      .charts,
+      .equations,
+      .status {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <h1>P-N diode and photodiode model</h1>
+      <p>Shows how lifetime and generation change reverse saturation current, dark current, photocurrent, and solar-cell open-circuit voltage.</p>
+
+      <div class="field">
+        <label for="temp">Temperature T <output id="tempOut"></output></label>
+        <input id="temp" type="range" min="250" max="400" step="1" value="300">
+      </div>
+
+      <div class="field">
+        <label for="areaExp">Junction area A <output id="areaOut"></output></label>
+        <input id="areaExp" type="range" min="-6" max="-2" step="0.1" value="-4">
+      </div>
+
+      <div class="field">
+        <label for="naExp">p-side doping NA <output id="naOut"></output></label>
+        <input id="naExp" type="range" min="14" max="18" step="0.1" value="16">
+      </div>
+
+      <div class="field">
+        <label for="ndExp">n-side doping ND <output id="ndOut"></output></label>
+        <input id="ndExp" type="range" min="14" max="18" step="0.1" value="16">
+      </div>
+
+      <div class="field">
+        <label for="tauN">Minority electron lifetime tau_n <output id="tauNOut"></output></label>
+        <input id="tauN" type="range" min="0.05" max="50" step="0.05" value="5">
+      </div>
+
+      <div class="field">
+        <label for="tauP">Minority hole lifetime tau_p <output id="tauPOut"></output></label>
+        <input id="tauP" type="range" min="0.05" max="50" step="0.05" value="5">
+      </div>
+
+      <div class="field">
+        <label for="dn">Electron diffusivity D_n <output id="dnOut"></output></label>
+        <input id="dn" type="range" min="5" max="50" step="0.5" value="35">
+      </div>
+
+      <div class="field">
+        <label for="dp">Hole diffusivity D_p <output id="dpOut"></output></label>
+        <input id="dp" type="range" min="3" max="25" step="0.5" value="12">
+      </div>
+
+      <div class="field">
+        <label for="jLight">Light current density J_L <output id="jLightOut"></output></label>
+        <input id="jLight" type="range" min="0" max="45" step="0.5" value="25">
+      </div>
+
+      <div class="field">
+        <label for="ideality">Ideality factor eta <output id="idealityOut"></output></label>
+        <input id="ideality" type="range" min="1" max="2" step="0.01" value="1.00">
+      </div>
+
+      <div class="toolbar">
+        <button id="reset" type="button">Reset</button>
+        <button id="export" type="button">Export PNG</button>
+      </div>
+    </aside>
+
+    <main>
+      <section class="metrics" aria-label="computed values">
+        <div class="metric">
+          <b>Reverse saturation current</b>
+          <span id="isMetric"></span>
+          <small>I_S = q A n_i^2 [D_p/(L_pN_D) + D_n/(L_nN_A)]</small>
+        </div>
+        <div class="metric">
+          <b>Photocurrent</b>
+          <span id="ilMetric"></span>
+          <small>I_L = J_L A</small>
+        </div>
+        <div class="metric">
+          <b>Solar-cell V_OC</b>
+          <span id="vocMetric"></span>
+          <small>V_OC = eta V_T ln(I_L/I_S + 1)</small>
+        </div>
+        <div class="metric">
+          <b>Diffusion lengths</b>
+          <span id="lengthMetric"></span>
+          <small>L_n and L_p from lifetime and diffusivity</small>
+        </div>
+        <div class="metric">
+          <b>Intrinsic density</b>
+          <span id="niMetric"></span>
+          <small>Temperature-dependent silicon estimate</small>
+        </div>
+      </section>
+
+      <section class="charts">
+        <div class="panel">
+          <h2>Dark and illuminated I-V curve</h2>
+          <canvas id="ivChart" width="900" height="540"></canvas>
+        </div>
+        <div class="panel">
+          <h2>Temperature sensitivity of I_S</h2>
+          <canvas id="tempChart" width="760" height="540"></canvas>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Equations used</h2>
+        <div class="equations">
+          <div class="eq">
+            <code>I_D = I_S [exp(V/(eta V_T)) - 1]</code>
+            <p>Dark diode current for the ideal diffusion-limited model.</p>
+          </div>
+          <div class="eq">
+            <code>I = I_D - I_L</code>
+            <p>Illumination shifts the I-V curve downward by the generated photocurrent.</p>
+          </div>
+          <div class="eq">
+            <code>L_n = sqrt(D_n tau_n), L_p = sqrt(D_p tau_p)</code>
+            <p>Shorter lifetime shortens diffusion length and raises recombination-limited losses.</p>
+          </div>
+          <div class="eq">
+            <code>n_i(T) rises roughly as T^(3/2) exp[-E_g/(2kT)]</code>
+            <p>Temperature strongly increases leakage because I_S depends on n_i squared.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="status">
+        <div>
+          <b id="leakageTitle"></b>
+          <span id="leakageText"></span>
+        </div>
+        <div>
+          <b id="lifetimeTitle"></b>
+          <span id="lifetimeText"></span>
+        </div>
+        <div>
+          <b id="photoTitle"></b>
+          <span id="photoText"></span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const q = 1.602176634e-19;
+    const kOverQ = 8.617333262e-5;
+    const Eg = 1.12;
+
+    const ids = [
+      "temp", "areaExp", "naExp", "ndExp", "tauN", "tauP",
+      "dn", "dp", "jLight", "ideality"
+    ];
+
+    const elements = Object.fromEntries(
+      [
+        ...ids, "tempOut", "areaOut", "naOut", "ndOut", "tauNOut",
+        "tauPOut", "dnOut", "dpOut", "jLightOut", "idealityOut",
+        "isMetric", "ilMetric", "vocMetric", "lengthMetric", "niMetric",
+        "ivChart", "tempChart", "reset", "export", "leakageTitle",
+        "leakageText", "lifetimeTitle", "lifetimeText", "photoTitle",
+        "photoText"
+      ].map((id) => [id, document.getElementById(id)])
+    );
+
+    function sci(value, digits = 2) {
+      if (!Number.isFinite(value)) return "n/a";
+      if (value === 0) return "0";
+      const abs = Math.abs(value);
+      if (abs >= 1e3 || abs < 1e-2) {
+        return value.toExponential(digits).replace("e+", "e");
+      }
+      return value.toLocaleString(undefined, { maximumFractionDigits: digits });
+    }
+
+    function fixed(value, digits = 2) {
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      });
+    }
+
+    function niAt(T) {
+      return 1e10 * (T / 300) ** 1.5 * Math.exp((Eg / (2 * kOverQ)) * (1 / 300 - 1 / T));
+    }
+
+    function modelAtTemperature(T, base) {
+      const ni = niAt(T);
+      const vt = kOverQ * T;
+      const ln = Math.sqrt(base.Dn * base.tauN);
+      const lp = Math.sqrt(base.Dp * base.tauP);
+      const is = q * base.A * ni * ni * (base.Dp / (lp * base.ND) + base.Dn / (ln * base.NA));
+      const il = base.jLightAcm2 * base.A;
+      const voc = il > 0 && is > 0 ? base.eta * vt * Math.log(il / is + 1) : 0;
+      return { T, ni, vt, ln, lp, is, il, voc };
+    }
+
+    function getModel() {
+      const base = {
+        T: Number(elements.temp.value),
+        A: 10 ** Number(elements.areaExp.value),
+        NA: 10 ** Number(elements.naExp.value),
+        ND: 10 ** Number(elements.ndExp.value),
+        tauN: Number(elements.tauN.value) * 1e-6,
+        tauP: Number(elements.tauP.value) * 1e-6,
+        Dn: Number(elements.dn.value),
+        Dp: Number(elements.dp.value),
+        jLightAcm2: Number(elements.jLight.value) * 1e-3,
+        eta: Number(elements.ideality.value)
+      };
+      return { ...base, ...modelAtTemperature(base.T, base) };
+    }
+
+    function resizeCanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(360, Math.floor(rect.height * dpr));
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawAxes(ctx, box, titleX, titleY) {
+      ctx.strokeStyle = "#25313d";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(box.left, box.top);
+      ctx.lineTo(box.left, box.bottom);
+      ctx.lineTo(box.right, box.bottom);
+      ctx.stroke();
+      ctx.fillStyle = "#44515f";
+      ctx.font = "12px Segoe UI, Arial, sans-serif";
+      ctx.fillText(titleX, (box.left + box.right) / 2 - 34, box.bottom + 34);
+      ctx.save();
+      ctx.translate(15, (box.top + box.bottom) / 2 + 52);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(titleY, 0, 0);
+      ctx.restore();
+    }
+
+    function drawIv(model) {
+      const { ctx, width, height } = resizeCanvas(elements.ivChart);
+      ctx.clearRect(0, 0, width, height);
+      const box = { left: 70, top: 22, right: width - 24, bottom: height - 58 };
+      const vMin = -0.55;
+      const vMax = 0.82;
+      const dark = [];
+      const light = [];
+      for (let i = 0; i <= 240; i += 1) {
+        const v = vMin + (vMax - vMin) * i / 240;
+        const expArg = Math.min(80, v / (model.eta * model.vt));
+        const id = model.is * (Math.exp(expArg) - 1);
+        dark.push({ v, i: id });
+        light.push({ v, i: id - model.il });
+      }
+      const limit = Math.max(model.il * 1.35, Math.max(...dark.map((p) => Math.abs(p.i))) * 0.18, 1e-15);
+      const yMin = -limit;
+      const yMax = limit;
+      const toX = (v) => box.left + ((v - vMin) / (vMax - vMin)) * (box.right - box.left);
+      const toY = (i) => box.bottom - ((Math.max(yMin, Math.min(yMax, i)) - yMin) / (yMax - yMin)) * (box.bottom - box.top);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = "#edf1f5";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#627080";
+      ctx.font = "11px Segoe UI, Arial, sans-serif";
+      for (let g = 0; g <= 4; g += 1) {
+        const iVal = yMin + (yMax - yMin) * g / 4;
+        const y = toY(iVal);
+        ctx.beginPath();
+        ctx.moveTo(box.left, y);
+        ctx.lineTo(box.right, y);
+        ctx.stroke();
+        ctx.fillText(sci(iVal) + " A", 10, y + 4);
+      }
+      for (let g = 0; g <= 5; g += 1) {
+        const v = vMin + (vMax - vMin) * g / 5;
+        const x = toX(v);
+        ctx.beginPath();
+        ctx.moveTo(x, box.bottom);
+        ctx.lineTo(x, box.bottom + 4);
+        ctx.stroke();
+        ctx.fillText(fixed(v, 2), x - 13, box.bottom + 20);
+      }
+      drawAxes(ctx, box, "voltage V (V)", "current I (A)");
+
+      const zeroY = toY(0);
+      const zeroX = toX(0);
+      ctx.strokeStyle = "#aab6c2";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(box.left, zeroY);
+      ctx.lineTo(box.right, zeroY);
+      ctx.moveTo(zeroX, box.top);
+      ctx.lineTo(zeroX, box.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      function drawCurve(points, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        points.forEach((p, idx) => {
+          const x = toX(p.v);
+          const y = toY(p.i);
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }
+      drawCurve(dark, "#1f6aa5");
+      drawCurve(light, "#2d8064");
+
+      ctx.fillStyle = "#1f6aa5";
+      ctx.fillText("dark diode", box.right - 88, box.top + 18);
+      ctx.fillStyle = "#2d8064";
+      ctx.fillText("illuminated", box.right - 88, box.top + 36);
+      if (model.voc > vMin && model.voc < vMax) {
+        const x = toX(model.voc);
+        ctx.strokeStyle = "#9b6500";
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(x, box.top);
+        ctx.lineTo(x, box.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#9b6500";
+        ctx.fillText("V_OC", x + 5, zeroY - 8);
+      }
+    }
+
+    function drawTemperature(model) {
+      const { ctx, width, height } = resizeCanvas(elements.tempChart);
+      ctx.clearRect(0, 0, width, height);
+      const box = { left: 70, top: 22, right: width - 24, bottom: height - 58 };
+      const temps = [];
+      const base = {
+        A: model.A, NA: model.NA, ND: model.ND, tauN: model.tauN,
+        tauP: model.tauP, Dn: model.Dn, Dp: model.Dp,
+        jLightAcm2: model.jLightAcm2, eta: model.eta
+      };
+      for (let t = 250; t <= 400; t += 2) {
+        temps.push(modelAtTemperature(t, base));
+      }
+      const logs = temps.map((p) => Math.log10(p.is));
+      const logMin = Math.floor(Math.min(...logs) - 0.5);
+      const logMax = Math.ceil(Math.max(...logs) + 0.5);
+      const toX = (T) => box.left + ((T - 250) / 150) * (box.right - box.left);
+      const toY = (I) => {
+        const y = (Math.log10(Math.max(I, 1e-40)) - logMin) / (logMax - logMin);
+        return box.bottom - y * (box.bottom - box.top);
+      };
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = "#edf1f5";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#627080";
+      ctx.font = "11px Segoe UI, Arial, sans-serif";
+      for (let g = logMin; g <= logMax; g += 1) {
+        const y = toY(10 ** g);
+        ctx.beginPath();
+        ctx.moveTo(box.left, y);
+        ctx.lineTo(box.right, y);
+        ctx.stroke();
+        ctx.fillText("1e" + g, 18, y + 4);
+      }
+      for (let T = 250; T <= 400; T += 30) {
+        const x = toX(T);
+        ctx.beginPath();
+        ctx.moveTo(x, box.bottom);
+        ctx.lineTo(x, box.bottom + 4);
+        ctx.stroke();
+        ctx.fillText(String(T), x - 10, box.bottom + 20);
+      }
+      drawAxes(ctx, box, "temperature T (K)", "I_S (A, log scale)");
+
+      ctx.strokeStyle = "#b23b3b";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      temps.forEach((p, idx) => {
+        const x = toX(p.T);
+        const y = toY(p.is);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const xNow = toX(model.T);
+      ctx.strokeStyle = "#1f6aa5";
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(xNow, box.top);
+      ctx.lineTo(xNow, box.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#1f6aa5";
+      ctx.fillText("selected T", xNow + 5, box.top + 16);
+    }
+
+    function updateOutputs(model) {
+      elements.tempOut.textContent = fixed(model.T, 0) + " K";
+      elements.areaOut.textContent = sci(model.A) + " cm^2";
+      elements.naOut.textContent = sci(model.NA) + " cm^-3";
+      elements.ndOut.textContent = sci(model.ND) + " cm^-3";
+      elements.tauNOut.textContent = fixed(model.tauN * 1e6, 2) + " us";
+      elements.tauPOut.textContent = fixed(model.tauP * 1e6, 2) + " us";
+      elements.dnOut.textContent = fixed(model.Dn, 1) + " cm^2/s";
+      elements.dpOut.textContent = fixed(model.Dp, 1) + " cm^2/s";
+      elements.jLightOut.textContent = fixed(model.jLightAcm2 * 1e3, 1) + " mA/cm^2";
+      elements.idealityOut.textContent = fixed(model.eta, 2);
+
+      elements.isMetric.textContent = sci(model.is) + " A";
+      elements.ilMetric.textContent = sci(model.il) + " A";
+      elements.vocMetric.textContent = fixed(model.voc, 3) + " V";
+      elements.lengthMetric.textContent = "Ln " + fixed(model.ln * 1e4, 0) + " um, Lp " + fixed(model.lp * 1e4, 0) + " um";
+      elements.niMetric.textContent = sci(model.ni) + " cm^-3";
+
+      elements.leakageTitle.textContent = "Leakage sensitivity";
+      elements.leakageText.textContent = "Because I_S scales with n_i squared, raising temperature sharply increases dark current and lowers V_OC.";
+
+      elements.lifetimeTitle.textContent = model.ln * 1e4 > 80 && model.lp * 1e4 > 40 ? "Long diffusion lengths" : "Recombination-limited";
+      elements.lifetimeText.textContent = "Shorter lifetime reduces L, increasing the saturation-current terms D/LN and making recombination losses larger.";
+
+      elements.photoTitle.textContent = model.il > 10 * model.is ? "Photocurrent dominates" : "Weak light or high leakage";
+      elements.photoText.textContent = "Illumination shifts the diode curve downward. The open-circuit voltage occurs where diode current balances photocurrent.";
+    }
+
+    function update() {
+      const model = getModel();
+      updateOutputs(model);
+      drawIv(model);
+      drawTemperature(model);
+    }
+
+    function reset() {
+      elements.temp.value = 300;
+      elements.areaExp.value = -4;
+      elements.naExp.value = 16;
+      elements.ndExp.value = 16;
+      elements.tauN.value = 5;
+      elements.tauP.value = 5;
+      elements.dn.value = 35;
+      elements.dp.value = 12;
+      elements.jLight.value = 25;
+      elements.ideality.value = 1.00;
+      update();
+    }
+
+    function exportCharts() {
+      const first = elements.ivChart;
+      const second = elements.tempChart;
+      const canvas = document.createElement("canvas");
+      canvas.width = first.width + second.width;
+      canvas.height = Math.max(first.height, second.height);
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(first, 0, 0);
+      ctx.drawImage(second, first.width, 0);
+      const link = document.createElement("a");
+      link.download = "pn-junction-generation-recombination-demo.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    ids.forEach((id) => elements[id].addEventListener("input", update));
+    elements.reset.addEventListener("click", reset);
+    elements.export.addEventListener("click", exportCharts);
+    window.addEventListener("resize", update);
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ELEC4603 Carrier Generation and Recombination Resources</title>
+  <style>
+    :root {
+      --bg: #f5f7f9;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #5d6b7a;
+      --line: #d8e0e8;
+      --blue: #1f6aa5;
+      --green: #2d8064;
+      --shadow: 0 8px 24px rgba(23, 32, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 28px 18px 40px;
+    }
+
+    header {
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.15;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      min-height: 190px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    a.button {
+      align-self: flex-start;
+      display: inline-block;
+      border: 1px solid var(--blue);
+      border-radius: 6px;
+      background: var(--blue);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    a.secondary {
+      background: #ffffff;
+      color: var(--blue);
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--green);
+      background: var(--panel);
+      border-radius: 6px;
+    }
+
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    @media (max-width: 720px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Carrier Generation and Recombination Resources</h1>
+      <p>Standalone ELEC4603 wiki support materials: two original interactive demos plus a LaTeX/PDF reference document.</p>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Lifetime and Diffusion Length Simulator</h2>
+        <p>Vary lifetime, surface recombination velocity, generation rate, temperature, and thickness to see excess-carrier decay and spatial survival before recombination.</p>
+        <a class="button" href="carrier_rg_interactive_demo.html">Open demo</a>
+      </article>
+
+      <article class="card">
+        <h2>P-N Diode and Photodiode Simulator</h2>
+        <p>Explore how temperature, doping, diffusion length, lifetime, area, and illumination affect dark current, photocurrent, saturation current, and open-circuit voltage.</p>
+        <a class="button" href="pn_junction_photodiode_demo.html">Open demo</a>
+      </article>
+
+      <article class="card">
+        <h2>Compiled PDF Reference</h2>
+        <p>A 9-page reference covering definitions, mechanisms, physical dependencies, device implications, worked problems, and references.</p>
+        <a class="button secondary" href="carrier_rg_wiki_document.pdf">Open PDF</a>
+      </article>
+
+      <article class="card">
+        <h2>Source Files</h2>
+        <p>Use the LaTeX source and paste-ready Markdown to adapt the material for OneNote or another wiki platform.</p>
+        <a class="button secondary" href="carrier_rg_wiki_document.tex">Open LaTeX</a>
+      </article>
+    </section>
+
+    <section class="note">
+      <p>These demos use simplified analytical models such as <code>L = sqrt(D tau)</code> and the ideal diode equation. They are designed for teaching trends and trade-offs, not process-calibrated device prediction.</p>
+    </section>
+  </main>
+</body>
+</html>

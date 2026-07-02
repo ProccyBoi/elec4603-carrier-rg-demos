@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carrier Generation and Recombination Demo</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #5d6b7a;
+      --line: #d8e0e8;
+      --blue: #1f6aa5;
+      --green: #2d8a67;
+      --red: #b33a3a;
+      --amber: #9a6500;
+      --shadow: 0 8px 24px rgba(23, 32, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(300px, 370px) 1fr;
+      min-height: 100vh;
+    }
+
+    aside {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 18px;
+      overflow: auto;
+    }
+
+    main {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 21px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .field {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .field:last-child {
+      border-bottom: 0;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    output {
+      color: var(--blue);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 8px 0 0;
+      accent-color: var(--blue);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin: 12px 0 6px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f9fbfd;
+      color: var(--ink);
+      min-height: 36px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    button:focus-visible {
+      border-color: var(--blue);
+      outline: none;
+    }
+
+    button.active {
+      color: #ffffff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border-left: 4px solid var(--blue);
+      background: #fbfcfe;
+      border-radius: 6px;
+      padding: 10px 12px;
+      min-height: 74px;
+    }
+
+    .metric:nth-child(2) {
+      border-left-color: var(--green);
+    }
+
+    .metric:nth-child(3) {
+      border-left-color: var(--amber);
+    }
+
+    .metric:nth-child(4) {
+      border-left-color: var(--red);
+    }
+
+    .metric b {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .metric span {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .metric small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      margin-top: 4px;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 340px;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    .equations {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .eq {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfe;
+      min-height: 78px;
+    }
+
+    .eq code {
+      display: block;
+      color: var(--ink);
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      margin-bottom: 6px;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .status div {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fbfcfe;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .status b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .metrics,
+      .charts,
+      .equations,
+      .status {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <h1>Carrier generation and recombination</h1>
+      <p>Interactive low-level injection model for lifetime, surface recombination, and diffusion length.</p>
+
+      <div class="segmented" aria-label="generation mode">
+        <button id="modeOn" class="active" type="button">Light on</button>
+        <button id="modeOff" type="button">Light off</button>
+      </div>
+
+      <div class="field">
+        <label for="temp">Temperature T <output id="tempOut"></output></label>
+        <input id="temp" type="range" min="250" max="400" step="1" value="300">
+      </div>
+
+      <div class="field">
+        <label for="dopingExp">p-type doping NA <output id="dopingOut"></output></label>
+        <input id="dopingExp" type="range" min="14" max="18" step="0.1" value="16">
+      </div>
+
+      <div class="field">
+        <label for="mu">Electron mobility mu_n <output id="muOut"></output></label>
+        <input id="mu" type="range" min="50" max="1500" step="10" value="1350">
+      </div>
+
+      <div class="field">
+        <label for="tauBulk">Bulk lifetime tau_bulk <output id="tauOut"></output></label>
+        <input id="tauBulk" type="range" min="0.05" max="50" step="0.05" value="2">
+      </div>
+
+      <div class="field">
+        <label for="sExp">Surface recombination S <output id="sOut"></output></label>
+        <input id="sExp" type="range" min="0" max="5" step="0.01" value="0">
+      </div>
+
+      <div class="field">
+        <label for="thickness">Wafer/device thickness W <output id="wOut"></output></label>
+        <input id="thickness" type="range" min="5" max="300" step="1" value="100">
+      </div>
+
+      <div class="field">
+        <label for="gExp">Generation rate G_L <output id="gOut"></output></label>
+        <input id="gExp" type="range" min="18" max="22" step="0.01" value="20.48">
+      </div>
+
+      <div class="field">
+        <label for="d0Exp">Initial excess Delta n(0) <output id="d0Out"></output></label>
+        <input id="d0Exp" type="range" min="12" max="17" step="0.05" value="15">
+      </div>
+
+      <div class="toolbar">
+        <button id="reset" type="button">Reset</button>
+        <button id="export" type="button">Export PNG</button>
+      </div>
+    </aside>
+
+    <main>
+      <section class="metrics" aria-label="computed values">
+        <div class="metric">
+          <b>Effective lifetime</b>
+          <span id="tauEffMetric"></span>
+          <small>1/tau_eff = 1/tau_bulk + 2S/W</small>
+        </div>
+        <div class="metric">
+          <b>Diffusion length</b>
+          <span id="lMetric"></span>
+          <small>L = sqrt(D tau_eff)</small>
+        </div>
+        <div class="metric">
+          <b>Steady excess</b>
+          <span id="deltaMetric"></span>
+          <small>Delta n_ss = G_L tau_eff</small>
+        </div>
+        <div class="metric">
+          <b>Low-level ratio</b>
+          <span id="ratioMetric"></span>
+          <small>max(Delta n)/NA</small>
+        </div>
+        <div class="metric">
+          <b>Intrinsic density</b>
+          <span id="niMetric"></span>
+          <small>simple silicon temperature model</small>
+        </div>
+      </section>
+
+      <section class="charts">
+        <div class="panel">
+          <h2>Excess carrier response</h2>
+          <canvas id="timeChart" width="900" height="520"></canvas>
+        </div>
+        <div class="panel">
+          <h2>Spatial survival before recombination</h2>
+          <canvas id="spaceChart" width="900" height="520"></canvas>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Equations used</h2>
+        <div class="equations">
+          <div class="eq">
+            <code>Delta n(t) = Delta n_ss + [Delta n(0) - Delta n_ss] exp(-t/tau_eff)</code>
+            <p>Use Delta n_ss = 0 when generation is switched off.</p>
+          </div>
+          <div class="eq">
+            <code>Delta n_ss = G_L tau_eff</code>
+            <p>Longer lifetime means a larger stored excess population for the same generation rate.</p>
+          </div>
+          <div class="eq">
+            <code>L = sqrt(D tau_eff), D = mu_n kT/q</code>
+            <p>Diffusion length links mobility, temperature, and lifetime.</p>
+          </div>
+          <div class="eq">
+            <code>n0 p0 = ni^2, p0 ~= NA</code>
+            <p>For p-type silicon, n0 is the minority electron concentration at equilibrium.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="status">
+        <div>
+          <b id="collectionTitle"></b>
+          <span id="collectionText"></span>
+        </div>
+        <div>
+          <b id="injectionTitle"></b>
+          <span id="injectionText"></span>
+        </div>
+        <div>
+          <b id="temperatureTitle"></b>
+          <span id="temperatureText"></span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      mode: "on"
+    };
+
+    const ids = [
+      "temp", "dopingExp", "mu", "tauBulk", "sExp",
+      "thickness", "gExp", "d0Exp"
+    ];
+
+    const elements = Object.fromEntries(
+      [
+        ...ids,
+        "modeOn", "modeOff", "reset", "export",
+        "tempOut", "dopingOut", "muOut", "tauOut", "sOut",
+        "wOut", "gOut", "d0Out", "tauEffMetric", "lMetric",
+        "deltaMetric", "ratioMetric", "niMetric", "timeChart",
+        "spaceChart", "collectionTitle", "collectionText",
+        "injectionTitle", "injectionText", "temperatureTitle",
+        "temperatureText"
+      ].map((id) => [id, document.getElementById(id)])
+    );
+
+    function sci(value, digits = 2) {
+      if (!Number.isFinite(value)) return "n/a";
+      if (value === 0) return "0";
+      const abs = Math.abs(value);
+      if (abs >= 1e3 || abs < 1e-2) {
+        return value.toExponential(digits).replace("e+", "e");
+      }
+      return value.toLocaleString(undefined, { maximumFractionDigits: digits });
+    }
+
+    function fixed(value, digits = 1) {
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      });
+    }
+
+    function getModel() {
+      const T = Number(elements.temp.value);
+      const NA = 10 ** Number(elements.dopingExp.value);
+      const mu = Number(elements.mu.value);
+      const tauBulk = Number(elements.tauBulk.value) * 1e-6;
+      const S = 10 ** Number(elements.sExp.value) - 1;
+      const Wum = Number(elements.thickness.value);
+      const Wcm = Wum * 1e-4;
+      const G = 10 ** Number(elements.gExp.value);
+      const d0 = 10 ** Number(elements.d0Exp.value);
+      const kTq = 8.617333262e-5 * T;
+      const D = mu * kTq;
+      const Eg = 1.12;
+      const ni = 1e10 * (T / 300) ** 1.5 * Math.exp((Eg / (2 * 8.617333262e-5)) * (1 / 300 - 1 / T));
+      const tauEff = 1 / (1 / tauBulk + (2 * S) / Wcm);
+      const Lcm = Math.sqrt(D * tauEff);
+      const Lum = Lcm * 1e4;
+      const deltaSS = state.mode === "on" ? G * tauEff : 0;
+      const timeMax = Math.max(0.5e-6, 5 * tauEff);
+      const ratio = Math.max(d0, deltaSS) / NA;
+      const n0 = (ni * ni) / NA;
+      return { T, NA, mu, tauBulk, S, Wum, Wcm, G, d0, kTq, D, ni, n0, tauEff, Lcm, Lum, deltaSS, timeMax, ratio };
+    }
+
+    function resizeCanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(360, Math.floor(rect.height * dpr));
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawAxes(ctx, box, titleX, titleY) {
+      ctx.strokeStyle = "#25313d";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(box.left, box.top);
+      ctx.lineTo(box.left, box.bottom);
+      ctx.lineTo(box.right, box.bottom);
+      ctx.stroke();
+      ctx.fillStyle = "#44515f";
+      ctx.font = "12px Segoe UI, Arial, sans-serif";
+      ctx.fillText(titleX, (box.left + box.right) / 2 - 38, box.bottom + 34);
+      ctx.save();
+      ctx.translate(15, (box.top + box.bottom) / 2 + 55);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(titleY, 0, 0);
+      ctx.restore();
+    }
+
+    function drawTimeChart(model) {
+      const canvas = elements.timeChart;
+      const { ctx, width, height } = resizeCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+      const box = { left: 66, top: 24, right: width - 22, bottom: height - 58 };
+
+      const samples = [];
+      for (let i = 0; i <= 180; i += 1) {
+        const t = (i / 180) * model.timeMax;
+        const d = model.deltaSS + (model.d0 - model.deltaSS) * Math.exp(-t / model.tauEff);
+        samples.push({ t, d: Math.max(d, 1) });
+      }
+
+      const values = samples.map((p) => p.d);
+      const logMin = Math.floor(Math.log10(Math.max(1, Math.min(...values) * 0.6)));
+      const logMax = Math.ceil(Math.log10(Math.max(...values) * 1.25));
+      const toX = (t) => box.left + (t / model.timeMax) * (box.right - box.left);
+      const toY = (d) => {
+        const y = (Math.log10(d) - logMin) / Math.max(1, logMax - logMin);
+        return box.bottom - y * (box.bottom - box.top);
+      };
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = "#edf1f5";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#627080";
+      ctx.font = "11px Segoe UI, Arial, sans-serif";
+      for (let g = logMin; g <= logMax; g += 1) {
+        const y = toY(10 ** g);
+        ctx.beginPath();
+        ctx.moveTo(box.left, y);
+        ctx.lineTo(box.right, y);
+        ctx.stroke();
+        ctx.fillText("1e" + g, 12, y + 4);
+      }
+
+      drawAxes(ctx, box, "time (microseconds)", "excess carrier density (cm^-3)");
+
+      ctx.strokeStyle = state.mode === "on" ? "#1f6aa5" : "#b33a3a";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      samples.forEach((p, idx) => {
+        const x = toX(p.t);
+        const y = toY(p.d);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      if (model.deltaSS > 0) {
+        const y = toY(model.deltaSS);
+        ctx.strokeStyle = "#2d8a67";
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(box.left, y);
+        ctx.lineTo(box.right, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#2d8a67";
+        ctx.fillText("steady state", box.right - 86, y - 7);
+      }
+
+      ctx.fillStyle = "#627080";
+      const xLabels = 5;
+      for (let i = 0; i <= xLabels; i += 1) {
+        const t = (i / xLabels) * model.timeMax;
+        const x = toX(t);
+        ctx.beginPath();
+        ctx.moveTo(x, box.bottom);
+        ctx.lineTo(x, box.bottom + 4);
+        ctx.stroke();
+        ctx.fillText(fixed(t * 1e6, 2), x - 14, box.bottom + 20);
+      }
+    }
+
+    function drawSpaceChart(model) {
+      const canvas = elements.spaceChart;
+      const { ctx, width, height } = resizeCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+      const box = { left: 58, top: 24, right: width - 24, bottom: height - 58 };
+      const xMax = Math.max(model.Wum, model.Lum * 3, 10);
+      const toX = (x) => box.left + (x / xMax) * (box.right - box.left);
+      const toY = (p) => box.bottom - p * (box.bottom - box.top);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = "#edf1f5";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#627080";
+      ctx.font = "11px Segoe UI, Arial, sans-serif";
+      for (let i = 0; i <= 4; i += 1) {
+        const p = i / 4;
+        const y = toY(p);
+        ctx.beginPath();
+        ctx.moveTo(box.left, y);
+        ctx.lineTo(box.right, y);
+        ctx.stroke();
+        ctx.fillText(Math.round(p * 100) + "%", 18, y + 4);
+      }
+
+      drawAxes(ctx, box, "distance from generation point (micrometers)", "survival fraction");
+
+      ctx.strokeStyle = "#2d8a67";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let i = 0; i <= 220; i += 1) {
+        const x = (i / 220) * xMax;
+        const p = Math.exp(-x / Math.max(model.Lum, 0.0001));
+        const px = toX(x);
+        const py = toY(p);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = "#9a6500";
+      ctx.setLineDash([6, 5]);
+      const wx = toX(model.Wum);
+      ctx.beginPath();
+      ctx.moveTo(wx, box.top);
+      ctx.lineTo(wx, box.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#9a6500";
+      ctx.fillText("W", wx + 5, box.top + 16);
+
+      if (model.Lum <= xMax) {
+        ctx.strokeStyle = "#1f6aa5";
+        ctx.setLineDash([3, 4]);
+        const lx = toX(model.Lum);
+        ctx.beginPath();
+        ctx.moveTo(lx, box.top);
+        ctx.lineTo(lx, box.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#1f6aa5";
+        ctx.fillText("L", lx + 5, box.top + 32);
+      }
+
+      ctx.fillStyle = "#627080";
+      for (let i = 0; i <= 5; i += 1) {
+        const xVal = (i / 5) * xMax;
+        const x = toX(xVal);
+        ctx.beginPath();
+        ctx.moveTo(x, box.bottom);
+        ctx.lineTo(x, box.bottom + 4);
+        ctx.stroke();
+        ctx.fillText(fixed(xVal, 0), x - 12, box.bottom + 20);
+      }
+    }
+
+    function updateOutputs(model) {
+      elements.tempOut.textContent = fixed(model.T, 0) + " K";
+      elements.dopingOut.textContent = sci(model.NA) + " cm^-3";
+      elements.muOut.textContent = fixed(model.mu, 0) + " cm^2/Vs";
+      elements.tauOut.textContent = fixed(model.tauBulk * 1e6, 2) + " us";
+      elements.sOut.textContent = sci(model.S) + " cm/s";
+      elements.wOut.textContent = fixed(model.Wum, 0) + " um";
+      elements.gOut.textContent = sci(model.G) + " cm^-3 s^-1";
+      elements.d0Out.textContent = sci(model.d0) + " cm^-3";
+
+      elements.tauEffMetric.textContent = fixed(model.tauEff * 1e6, 3) + " us";
+      elements.lMetric.textContent = fixed(model.Lum, 1) + " um";
+      elements.deltaMetric.textContent = sci(model.deltaSS) + " cm^-3";
+      elements.ratioMetric.textContent = sci(model.ratio, 2);
+      elements.niMetric.textContent = sci(model.ni) + " cm^-3";
+
+      if (model.Lum >= model.Wum) {
+        elements.collectionTitle.textContent = "Collection friendly";
+        elements.collectionText.textContent = "Diffusion length is longer than the modeled thickness, so carriers generated in the bulk have a stronger chance of reaching a junction or contact.";
+      } else if (model.Lum >= model.Wum / 2) {
+        elements.collectionTitle.textContent = "Moderate collection";
+        elements.collectionText.textContent = "Diffusion length is comparable to the device thickness. Surface passivation and junction placement matter.";
+      } else {
+        elements.collectionTitle.textContent = "Recombination limited";
+        elements.collectionText.textContent = "Diffusion length is short compared with the thickness, so many carriers recombine before collection.";
+      }
+
+      if (model.ratio < 0.01) {
+        elements.injectionTitle.textContent = "Low-level injection";
+        elements.injectionText.textContent = "The excess carrier density is much smaller than the majority doping, so the single-lifetime approximation is strong.";
+      } else if (model.ratio <= 0.1) {
+        elements.injectionTitle.textContent = "Borderline low-level";
+        elements.injectionText.textContent = "The low-level approximation is usable for estimates, but high-level effects may begin to matter.";
+      } else {
+        elements.injectionTitle.textContent = "High-level warning";
+        elements.injectionText.textContent = "The excess carrier density is not small compared with the majority density. The simple low-level equations are no longer reliable.";
+      }
+
+      elements.temperatureTitle.textContent = "Temperature effect";
+      elements.temperatureText.textContent = "At this temperature, the model gives n0 = " + sci(model.n0) + " cm^-3 and D = " + fixed(model.D, 2) + " cm^2/s. Higher T raises intrinsic carrier density and often leakage.";
+    }
+
+    function update() {
+      const model = getModel();
+      updateOutputs(model);
+      drawTimeChart(model);
+      drawSpaceChart(model);
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      elements.modeOn.classList.toggle("active", mode === "on");
+      elements.modeOff.classList.toggle("active", mode === "off");
+      update();
+    }
+
+    function exportCharts() {
+      const first = elements.timeChart;
+      const second = elements.spaceChart;
+      const canvas = document.createElement("canvas");
+      canvas.width = first.width + second.width;
+      canvas.height = Math.max(first.height, second.height);
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(first, 0, 0);
+      ctx.drawImage(second, first.width, 0);
+      const link = document.createElement("a");
+      link.download = "carrier-generation-recombination-demo.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function reset() {
+      elements.temp.value = 300;
+      elements.dopingExp.value = 16;
+      elements.mu.value = 1350;
+      elements.tauBulk.value = 2;
+      elements.sExp.value = 0;
+      elements.thickness.value = 100;
+      elements.gExp.value = 20.48;
+      elements.d0Exp.value = 15;
+      setMode("on");
+    }
+
+    ids.forEach((id) => elements[id].addEventListener("input", update));
+    elements.modeOn.addEventListener("click", () => setMode("on"));
+    elements.modeOff.addEventListener("click", () => setMode("off"));
+    elements.reset.addEventListener("click", reset);
+    elements.export.addEventListener("click", exportCharts);
+    window.addEventListener("resize", update);
+    update();
+  </script>
+</body>
+</html>
