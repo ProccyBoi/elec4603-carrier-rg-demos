@@ -1,15 +1,12 @@
 # ELEC4603 Carrier Generation and Recombination Demos
 
-This repository contains shareable teaching resources for an ELEC4603 wiki page on carrier generation, recombination, carrier lifetime, diffusion length, and device applications.
+This repository contains shareable interactive teaching resources for an ELEC4603 wiki page on carrier generation, recombination, carrier lifetime, diffusion length, and device applications.
 
 ## Contents
 
 - `index.html` - landing page linking the resources.
 - `carrier_rg_interactive_demo.html` - interactive lifetime, surface recombination, and diffusion length simulator.
 - `pn_junction_photodiode_demo.html` - interactive p-n diode / photodiode simulator for dark current, photocurrent, saturation current, and open-circuit voltage.
-- `carrier_rg_wiki_document.tex` - LaTeX source for the wiki reference document.
-- `carrier_rg_wiki_document.pdf` - compiled PDF reference.
-- `carrier_rg_wiki_paste_ready_sections.md` - paste-ready OneNote/wiki sections.
 
 ## How To Use
 
@@ -37,4 +34,3 @@ Key models used:
 - C. Honsberg and S. Bowden, "Diffusion Length," PV Education.
 - C. G. Fonstad, "Lecture 6: p-n Junctions: I-V Relationship," MIT OpenCourseWare.
 - P. Hadley, "PN diode IV characteristics," TU Graz.
-
